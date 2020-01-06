@@ -6,6 +6,7 @@ const config = require('./config')// 配置文件
 const static = require('koa-static')// 处理静态文件
 const body = require('koa-body')// 解析请求内容
 const error = require('./libs/error')// 错误处理
+const db = require('./libs/database')
 const app = new Koa()
 const router = new Router()
 app.use(body())
@@ -17,7 +18,8 @@ ejs(app, {
   debug: false
 })
 Object.assign(app.context, {
-  config
+  config,
+  db
 })
 app.use(error)
 // 引入子路由
