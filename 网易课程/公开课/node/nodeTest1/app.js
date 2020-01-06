@@ -8,17 +8,54 @@ const url = require('url')
 const querystring = require('querystring')
 
 let strateComp = {
-  '/user': {},
-  '/login': {}
+  '/user': {
+    handle: function() {
+      console.log('访问用户页面')
+    }
+  },
+  '/login': {
+    handle: function() {
+      console.log('访问登录页面')
+    }
+  },
+  '/': {
+    handle: function() {
+      console.log('访问根目录')
+    }
+  }
 }
 
 const app = http.createServer((request, respones) => {
-  if (request.method === 'GET') {
-    const url = request.url
-    // 处理get请求
-    // 处理文件
+  if (request.method.toUpperCase() === 'GET') {
+    const { path, query, pathname} = url.parse(request.url, true)
+    let requestHandle = strateComp[pathname]
+    if (requestHandle) {
+      // 处理get请求
+      console.log(query)
+      requestHandle.handle(query)
+    } else {
+      // 处理文件
+      fs.readFile(`./page${path}`, (err, buffer) => {
+        if (err) {
+          respones.write('this page is not find')
+        } else {
+          respones.write(buffer)
+        }
+        respones.end()
+      })
+    }
   } else {
     // 处理post请求
+    let arr = []
+    request.on('data', (data) => {
+      arr.push(data)
+    })
+    request.on('end', () => {
+      let buffer = Buffer.concat(arr)
+      console.log(buffer.toString())
+      let post = querystring.parse(buffer.toString())
+      console.log(post)
+    })
   }
 })
 
