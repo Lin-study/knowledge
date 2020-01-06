@@ -1,0 +1,26 @@
+* {
+  font-size: 20px;
+}
+body {
+  background-color: aquamarine;
+}
+/* :root {
+  --bgColor: red
+} */
+/* .div1 {
+  display: flex;
+  background-color: var(--bgColor);
+} */
+/* .img {
+  background: url("../img/img1.jpg");
+}
+.img4 {
+  background: url("../img/img4.jpg");
+} */
+/* :global .bg-red {
+  background-color: red;
+}
+:local .div1 {
+  composes: child-border  from './child.css';
+  border: 1px solid red;
+} */

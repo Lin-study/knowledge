@@ -1,0 +1,1 @@
+const right:string = 'right'
