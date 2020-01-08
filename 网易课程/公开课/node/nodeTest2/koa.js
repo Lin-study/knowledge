@@ -24,6 +24,8 @@ Object.assign(app.context, {
 app.use(error)
 // 引入子路由
 router.use('/admin', require('./router/admin'))
+// 引入api路由
+router.use('/api', require('./api/admin/register'))
 // 引入路由
 app.use(router.routes())
 // 引入静态文件

@@ -188,18 +188,12 @@
       $('#submit').on('click', function () {
         console.log(123)
         $.ajax({
-          url: 'http://localhost:3000/admin/login',
+          url: 'http://localhost:3000/api/reg',
           type: 'post',
           dataType: 'json',
           data: {
             userName: $('#username').val(),
             passWord: $('#password').val()
-          },
-          success: function () {
-            console.log('登陆成功')
-          },
-          error: function (e) {
-            console.log(e)
           }
         })
       })
