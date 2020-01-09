@@ -52,7 +52,7 @@
       * [TS学习01.md](./前端知识整理\框架\TS学习\TS学习01.md)
       * [TS学习02.md](./前端知识整理\框架\TS学习\TS学习02.md)
     - [Vue.js](./前端知识整理\框架\Vue.js)
-      * [virtual dom.md](./前端知识整理\框架\Vue.js\virtual dom.md)
+      * [virtual-dom.md](./前端知识整理\框架\Vue.js\virtual-dom.md)
       * [vue-diff.md](./前端知识整理\框架\Vue.js\vue-diff.md)
       * [vue插件实现.md](./前端知识整理\框架\Vue.js\vue插件实现.md)
       * [响应原理.md](./前端知识整理\框架\Vue.js\响应原理.md)
