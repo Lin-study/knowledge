@@ -19,7 +19,7 @@ const getdir = function (dir, list) {
       path: filePath,
       size: stats.size
     }
-    if (stats.isDirectory() && !filterPath.find(p => filePath.includes(p)&&!filePath.endsWith(p))) {
+    if (stats.isDirectory() && !filterPath.find(p => filePath.includes(p) && !filePath.endsWith(p))) {
       item.child = []
       getdir(filePath, item.child)
     }
