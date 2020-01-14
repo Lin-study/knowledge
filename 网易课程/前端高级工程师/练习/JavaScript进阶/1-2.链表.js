@@ -10,11 +10,10 @@
  */
 function traversal(linkedList, callback) {
   let node = linkedList.head
-  while(node.next) {
+  while(node !== null) {
     callback(node.value)
     node = node.next
   }
-  callback(node.value)
 }
 
 const NodeD = {

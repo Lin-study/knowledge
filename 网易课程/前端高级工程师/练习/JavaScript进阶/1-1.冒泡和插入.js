@@ -12,7 +12,7 @@ function bubbleSort(src) {
   let arr = [...src];
   let length = arr.length
   for (let i = 0; i < length - 1; i += 1) {
-    for (let j = 0; j < length - 1; j += 1) {
+    for (let j = 0; j < length - 1 - i; j += 1) {
       let item = arr[j]
       let nextItem = arr[j + 1]
       if (nextItem < item) {
@@ -70,7 +70,7 @@ const samples = [{
 
 samples.forEach(({
   src
-}) => console.log(insertionSort(src)));
+}) => console.log(bubbleSort(src)));
 
 // describe("bubbleSort()", () => {
 //   it("应该正确地排序", () => {
