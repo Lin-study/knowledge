@@ -29,4 +29,30 @@ const floyd = head => {
     }
     depArr.push(depItem.dep);
   }
+  return -1
 };
+
+
+
+const c = {
+  value: -4
+};
+
+const b = {
+  value: 0
+};
+
+const a = {
+  value: 2
+};
+
+const head = {
+  value: 3
+};
+
+head.dep = a;
+a.dep = b;
+b.dep = c;
+c.dep = a;
+
+console.log(floyd(head))

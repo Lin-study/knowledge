@@ -16,6 +16,39 @@ function traversal(linkedList, callback) {
   }
 }
 
+/***********************优化********************************* */
+
+function memo(fun, hasher) {
+  const cache = {}
+  return function x(...args) {
+    let key = '' + (hasher ? hasher(...args): args[0])
+    if (!cache[key]) {
+      cache[key] = fun(...args)
+    }
+    return cache[key]
+  }
+}
+
+let start
+let cb
+
+function run() {
+  while(start) {
+    cb(start.value)
+    start = start.next
+  }
+}
+
+function traversal(linkedList, callback) {
+  start = linkedList.head
+  cb = memo(callback)
+  run()
+}
+
+/*********************************************************** */
+
+
+
 const NodeD = {
   value: 4,
   next: null
