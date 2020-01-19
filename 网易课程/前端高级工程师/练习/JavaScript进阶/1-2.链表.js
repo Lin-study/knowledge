@@ -10,7 +10,7 @@
  */
 function traversal(linkedList, callback) {
   let node = linkedList.head
-  while(node !== null) {
+  while (node !== null) {
     callback(node.value)
     node = node.next
   }
@@ -21,7 +21,7 @@ function traversal(linkedList, callback) {
 function memo(fun, hasher) {
   const cache = {}
   return function x(...args) {
-    let key = '' + (hasher ? hasher(...args): args[0])
+    let key = '' + (hasher ? hasher(...args) : args[0])
     if (!cache[key]) {
       cache[key] = fun(...args)
     }
@@ -33,7 +33,7 @@ let start
 let cb
 
 function run() {
-  while(start) {
+  while (start) {
     cb(start.value)
     start = start.next
   }
@@ -47,33 +47,31 @@ function traversal(linkedList, callback) {
 
 /*********************************************************** */
 
-
-
 const NodeD = {
   value: 4,
   next: null
-};
+}
 
 const NodeC = {
   value: 3,
   next: NodeD
-};
+}
 
 const NodeB = {
   value: 2,
   next: NodeC
-};
+}
 
 const NodeA = {
   value: 1,
   next: NodeB
-};
+}
 
 const LinkedList = {
   head: NodeA
-};
+}
 let sum = 0
-traversal(LinkedList, current => (sum += current));
+traversal(LinkedList, current => (sum += current))
 console.log(sum)
 // describe("遍历链表节点并对每一个节点的value值求和", () => {
 //   let sum = 0;

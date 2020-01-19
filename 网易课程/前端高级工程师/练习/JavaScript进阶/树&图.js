@@ -18,41 +18,39 @@
  * 参考： https://leetcode-cn.com/problems/linked-list-cycle/
  */
 const floyd = head => {
-  let depArr = [head];
-  let bool = true;
-  let depItem = head;
+  let depArr = [head]
+  let bool = true
+  let depItem = head
   while (bool) {
-    if (!depItem || !depItem.dep) return 0;
+    if (!depItem || !depItem.dep) return 0
     if (depArr.includes(depItem.dep)) {
-      bool = false;
-      return depArr.indexOf(depItem.dep);
+      bool = false
+      return depArr.indexOf(depItem.dep)
     }
-    depArr.push(depItem.dep);
+    depArr.push(depItem.dep)
   }
   return -1
-};
-
-
+}
 
 const c = {
   value: -4
-};
+}
 
 const b = {
   value: 0
-};
+}
 
 const a = {
   value: 2
-};
+}
 
 const head = {
   value: 3
-};
+}
 
-head.dep = a;
-a.dep = b;
-b.dep = c;
-c.dep = a;
+head.dep = a
+a.dep = b
+b.dep = c
+c.dep = a
 
 console.log(floyd(head))
