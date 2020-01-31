@@ -370,7 +370,7 @@ let Person = function(name, work) {
 ``` JS
 let loopImages = function() {}
 loopImages.prototype = {
-  changeImage: functino() {}
+  changeImage: function() {}
 }
 let SlideImg = function() {
   loopImages.call(this)
@@ -420,15 +420,360 @@ var getSingle = function(fn) {
 
 # 外观模式
 
+> 为一组复杂的子系统接口提供一个更高级的同一接口，通过这个接口使得对子系统接口的访问更容易
+
+用于统一功能接口方法不统一
+
+``` JS
+// 封装针对dom事件在不同浏览器中的表现
+function addEvent(dom, type, fn) {
+  if (dom.addEventListener) {
+    dom.addEventListener(type, fn, false)
+  } else if (dom.attachEvent) {
+    dom.attachEvent('on' + type, fn)
+  } else {
+    dom['on' + type] = fn
+  }
+}
+```
+
+很多代码库也会通过外观模式来封装功能，通过对接口方法的外层包装，以供上层代码调用
+
+``` JS
+let dom = {
+  g: function() {},
+  css: function() {},
+  attr: function() {}
+}
+```
+
 # 适配器模式
+
+> 将一个接口转换成留一个接口以满足用户的使用
+
+## 框架适配器
+
+``` JS
+// 两个除了命名空间不一致时
+window.A = A = jquery
+// 仅为相似时
+A.g = function(id) {
+  return $(id).get(0)
+}
+```
+
+## 参数适配器
+
+因为参数有一些必须传入，或者说有默认值，常用此方法实现，但是ES6中可以直接对参数设置默认值
+
+``` JS
+function doSomeThing(obj) {
+  let _adapter = {
+    name: 233
+  }
+  for (let i in _adapter) {
+    _adapter[i] = obj[i] || _adapter[i]
+  }
+}
+```
 
 # 代理模式
 
+> 由于一个对象不能直接引用另一个对象，需要通过代理对象在两个对象中起到中介作用
+
+``` JS
+// 代理统计--站长统计
+// 通过img标签的src属性发送的get请求是一个代理对象
+let Count = (function() {
+  let img = new Image()
+  return function(param) {
+    let str = 'http://122d'
+    for (let i in param) {
+      str += i + '='
+      param[i]
+    }
+    img.src = str
+  }
+})()
+Count({
+  num: 10
+})
+// JSONP
+// 通过script标签作为代理对象
+```
+
 # 装饰者模式
+
+> 在不改变源对象的基础上，通过对其进行包装使源对象可以满足用户的更复杂需求
+
+## 实现方式
+
+1. 获取事件源
+2. 获取事件源方法并另行存储
+3. 将事件源的方法更新为先执行旧事件再执行新事件
+
+``` JS
+let decorator = function(input, fn) {
+  let input = document.getElementById(input)
+  if (typeof input.onclick === 'function') {
+    let oldClickFn = input.onclick
+    input.onclick = function() {
+      oldClickFn()
+      fn()
+    }
+  } else {
+    input.onclick = fn
+  }
+}
+```
+
+## 和适配器模式区别
+
+相同点
+
+* 都是针对一个对象的装饰来适配其他对象
+
+不同点
+
+* 适配器模式：是对原有的对象进行适配，添加的方法和原有对象功能大致相似
+* 装饰者模式：提供的方法和原方法有一定的区别（不需要了解对象的原有功能）
 
 # 桥接模式
 
+> 在系统延展多个维度变化的同时，又不增加其复杂度并已到达解耦
+
+``` JS
+// 匿名函数--桥接方法
+span[0].onmouseover = function() {
+  changeColor(this, 'red', '#fff')
+}
+```
+
 # 组合模式
 
+> 将对象组合成树形结构以表示“部分整体”的层次结构。组合模式使得用户对单个对象和组合对象的使用具有一致性
+
+将面板中的数据拆成树状结构
+
+例如构建一个新闻模块
+
+``` JS
+// 先创建基类（供所有对象继承）
+let News = function() {}
+// 创建容器函数（供新闻类对象的存放）
+let Container = function() {}
+// 创建每条新闻的容器类
+let Item = function() {}
+// 创建每条新闻的组合类
+let NewsGroup = function() {}
+
+/***********************单条新闻的实现******************************/
+// 图片类新闻
+let ImageNews = function() {}
+// 携带icon的新闻
+let IconNews = function() {}
+// 文字新闻
+let EasyNews = function() {}
+
+/***********************创建新闻***********************************/
+let news1 = new Countatiner('news', document.body)
+news1.add(
+  new Item('normal').add(
+    new IconNews('新闻1', '#', 'videw')
+  )
+).add(
+  new Item('normal').add(
+    new IconNews('新闻2', '#', 'live')
+  )
+).add(
+  new Item('normal').add(
+    new NewsGroup('img1').add(
+      new ImageNews('1.png', '#', 'small')
+    ).add(
+      new EasyNews('新闻3')
+    )
+  )
+)
+```
+
 # 享元模式
+
+> 运用共享技术有效的支持大量的细粒度的对象，避免对象间用于相同内容造成多余的开销
+
+主要是对数据、方法的共享分离，将数据和对象分为内部数据、内部方法和外部数据、外部方法。
+
+内部数据和方法是相似或者共有的数据和方法
+
+``` JS
+/***************事件的享元--将获取和创建dom的方法提取******************/
+let FlyWeight = function() {
+  let created = []
+
+  function create() {
+    let dom = document.createElement('div')
+    document.getElementById('container').appendChild(dom)
+    created.push(dom)
+    return dom
+  }
+  return {
+    getDiv: function() {
+      if (created.length < 5) {
+        return create()
+      } else {
+        let div = created.shift()
+        created.push(div)
+        return div
+      }
+    }
+  }
+}
+
+/***********************享元动作*****************************************/
+// 创建共有的移动方法
+let flyWeight = {
+  moveX: function(x) {
+    this.x = x
+  },
+  moveY: function(y) {
+    this.y = y
+  }
+}
+// 移动继承
+let Player = function() {}
+Player.prototype = flyWeight
+```
+
+# 模板方法模式
+
+> 父类中定义一组操作算法骨架，而将一些实现步骤延迟到子类，使子类可以不改变父类的算法的同时可以重新定义算法中某些实现步骤
+
+将多个模型抽象归一化，从中抽取出来一个最基本的模板，其他模板只需要继续继承这个模板方法
+
+``` JS
+/****************************创建提示框*******************************************/
+// 创建模板基类
+let AlertPanel = function() {}
+AlertPanel.prototype = {}
+// 根据抽象的模板基类通过继承方式实现功能
+// 右侧提示按钮
+let RightAlert = function(data) {
+  AlertPanel.call(this, data)
+}
+RightAlert.prototype = new AlertPanel()
+// 同时继承的类也可以再次作为基类
+let cancelAlert = function(data) {
+  RightAlert.call(this, data)
+}
+cancelAlert.prototype = new RightAlert()
+/****************************创建多类导航*******************************************/
+// 设置导航基类
+let Nav = function(data) {
+  return html
+}
+// 实现类
+let NumNav = function(data) {
+  return Nav.call(this, data)
+}
+```
+
+# 观察者模式（发布-订阅者模式）
+
+> 定义了一种依赖关系，解决了主体对象与观察者之间功能的耦合
+
+通常负责模块之间的通信
+
+1. 接受发来的消息
+2. 向订阅的中转站发送相应的消息
+
+``` JS
+// 创建观察者（使用闭包在页面加载的时候被直接执行）
+let Observer = (function() {
+  let _message = {}
+  return {
+    // 注册
+    regist: function() {},
+    // 发布
+    fire: function() {},
+    // 移除
+    remove: function() {}
+  }
+})()
+```
+
+# 状态模式
+
+> 当一个对象内部状态发生改变时，会导致其行文的改变，这看起来像是改变了状态。
+
+和策略模式很像
+
+``` JS
+function ResultState() {
+  // 状态对象
+  let states = {
+    state0: function() {},
+    state1: function() {}
+  }
+  // 当前状态
+  let myState = 0
+  // 更新状态
+  const changeState = (state) => {
+    myState = state
+    return this
+  }
+  // 执行状态方法
+  const show = (result) => {
+    states['state' + myState] && states['state' + myState]()
+    return this
+  }
+  return {
+    show,
+    chageState
+  }
+}
+ResultState().changeState(0).show().show().chageState(1).show()
+```
+
+# 策略模式
+
+# 职责链模式
+
+# 命令模式
+
+# 访问者模式
+
+# 中介者模式
+
+# 备忘录模式
+
+# 迭代器模式
+
+# 解释器模式
+
+# 链模式
+
+# 委托模式
+
+# 数据访问对象模式
+
+# 节流模式
+
+# 简单模板模式
+
+# 惰性模式
+
+# 参与者模式
+
+# 等待者模式
+
+# 同步模块模式
+
+# 异步模块模式
+
+# widget模式
+
+# MVC模式
+
+# MVP模式
+
+# MVVM模式
 
