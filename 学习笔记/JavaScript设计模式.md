@@ -418,7 +418,7 @@ var getSingle = function(fn) {
 };
 ```
 
-# 外观模式
+## 外观模式
 
 > 为一组复杂的子系统接口提供一个更高级的同一接口，通过这个接口使得对子系统接口的访问更容易
 
@@ -447,11 +447,11 @@ let dom = {
 }
 ```
 
-# 适配器模式
+## 适配器模式
 
 > 将一个接口转换成留一个接口以满足用户的使用
 
-## 框架适配器
+### 框架适配器
 
 ``` JS
 // 两个除了命名空间不一致时
@@ -462,7 +462,7 @@ A.g = function(id) {
 }
 ```
 
-## 参数适配器
+### 参数适配器
 
 因为参数有一些必须传入，或者说有默认值，常用此方法实现，但是ES6中可以直接对参数设置默认值
 
@@ -477,7 +477,7 @@ function doSomeThing(obj) {
 }
 ```
 
-# 代理模式
+## 代理模式
 
 > 由于一个对象不能直接引用另一个对象，需要通过代理对象在两个对象中起到中介作用
 
@@ -502,11 +502,11 @@ Count({
 // 通过script标签作为代理对象
 ```
 
-# 装饰者模式
+## 装饰者模式
 
 > 在不改变源对象的基础上，通过对其进行包装使源对象可以满足用户的更复杂需求
 
-## 实现方式
+### 实现方式
 
 1. 获取事件源
 2. 获取事件源方法并另行存储
@@ -527,7 +527,7 @@ let decorator = function(input, fn) {
 }
 ```
 
-## 和适配器模式区别
+### 和适配器模式区别
 
 相同点
 
@@ -538,7 +538,7 @@ let decorator = function(input, fn) {
 * 适配器模式：是对原有的对象进行适配，添加的方法和原有对象功能大致相似
 * 装饰者模式：提供的方法和原方法有一定的区别（不需要了解对象的原有功能）
 
-# 桥接模式
+## 桥接模式
 
 > 在系统延展多个维度变化的同时，又不增加其复杂度并已到达解耦
 
@@ -549,7 +549,7 @@ span[0].onmouseover = function() {
 }
 ```
 
-# 组合模式
+## 组合模式
 
 > 将对象组合成树形结构以表示“部分整体”的层次结构。组合模式使得用户对单个对象和组合对象的使用具有一致性
 
@@ -596,7 +596,7 @@ news1.add(
 )
 ```
 
-# 享元模式
+## 享元模式
 
 > 运用共享技术有效的支持大量的细粒度的对象，避免对象间用于相同内容造成多余的开销
 
@@ -643,7 +643,7 @@ let Player = function() {}
 Player.prototype = flyWeight
 ```
 
-# 模板方法模式
+## 模板方法模式
 
 > 父类中定义一组操作算法骨架，而将一些实现步骤延迟到子类，使子类可以不改变父类的算法的同时可以重新定义算法中某些实现步骤
 
@@ -676,7 +676,7 @@ let NumNav = function(data) {
 }
 ```
 
-# 观察者模式（发布-订阅者模式）
+## 观察者模式（发布-订阅者模式）
 
 > 定义了一种依赖关系，解决了主体对象与观察者之间功能的耦合
 
@@ -691,20 +691,40 @@ let Observer = (function() {
   let _message = {}
   return {
     // 注册
-    regist: function() {},
+    regist: function(type, fn) {
+      if (typeof fn !== 'function') return
+      if (_message[type]) {
+        _message[type].push(action)
+      } else {
+        _message[type] = [action]
+      }
+    },
     // 发布
-    fire: function() {},
+    fire: function(type, args) {
+      if (!_message[type]) return
+      let events = {
+        type,
+        args: args || {}
+      }
+      _message[type].forEach(fn => {
+        fn.call(this, events)
+      })
+    },
     // 移除
-    remove: function() {}
+    remove: function(type, fn) {
+      if (_message[type] instanceof Array) {
+        _message[type].splice(_message[type].indexof(fn), 1)
+      }
+    }
   }
 })()
 ```
 
-# 状态模式
+## 状态模式
 
 > 当一个对象内部状态发生改变时，会导致其行文的改变，这看起来像是改变了状态。
 
-和策略模式很像
+和策略模式很像，都是在内部封装一个对象，通过返回的接口对象实现对内部对象的调用
 
 ``` JS
 function ResultState() {
@@ -733,47 +753,150 @@ function ResultState() {
 ResultState().changeState(0).show().show().chageState(1).show()
 ```
 
-# 策略模式
+## 策略模式（jquery的动画缓冲函数）
 
-# 职责链模式
+> 将定义的一组算法封装起来，使其互相之间可以替换。封装的算法具有一定独立性，不会随客户端的变化而变化
 
-# 命令模式
+``` JavaScript
+function Person(age, name) {
+  this.age = age
+  this.name = name
+  // 定义算法对象
+  let valiob = {
+    name: function(value) {
+      if (typeof value === 'string') return true
+    },
+    age: function(value) {
+      if (typeof value === 'number' && value >= 18) return true
+    }
+  }
+  return new Proxy(this, {
+    get: function(target, key) {
+      return Reflect.get(target, key)
+    },
+    set: function(target, key, value) {
+      if (valiob[key] && valiob[key](value)) {
+        return Reflect.set(target, key, value)
+      } else {
+        return new Error(key + 'type Error')
+      }
+    }
+  })
+}
+```
 
-# 访问者模式
+## 职责链模式
 
-# 中介者模式
+> 解决请求发送者和接受者之间的耦合，通过多个对象分解请求流程，实现请求多个对象之间的传递，知道最后一个对象完成请求
 
-# 备忘录模式
+如果一个需求要做很多事，那就将每件事情独立出去一个模块对象去处理
 
-# 迭代器模式
+## 命令模式
 
-# 解释器模式
+> 将请求与实现解耦并封装成独立对象，从而使不同的请求对客户端实现参数化
 
-# 链模式
+是将创建模块的逻辑封装在一个对象里，这个对象提供一个参数化的请求接口，通过这个接口并传递一些参数实现调用命令对象内部中的一些方法
 
-# 委托模式
+``` JS
+// 模块实现
+function viewCommand = (function() {
+  // 方法集合
+  let action = {
+    // 创建方法
+    create: function() {},
+    // 展示方法
+    display: function() {}
+  }
+  // 命令接口
+  return function excute(msg) {
+    msg.param = Array.isArray(msg.param) ? msg.param : [msg.param]
+    action[msg.command].apply(action, msg.param)
+  }
+})()
+// 调用
+viewCommand({
+  // 执行的方法
+  command: 'create',
+  // 参数
+  param: [{}]
+})
+```
 
-# 数据访问对象模式
+## 访问者模式
 
-# 节流模式
+> 针对对象结构中的元素，定义在不改变该对象的前提下访问结构中元素的新方法
 
-# 简单模板模式
+通过call或apply的作用更改函数执行的作用域
 
-# 惰性模式
+``` JS
+function bindIEEvent(dom, type, fn, data) {
+  dom.attachEvent('on' + type, function(e) {
+    fn.call(dom, e, data)
+  })
+}
+```
 
-# 参与者模式
+## 中介者模式
 
-# 等待者模式
+> 通过中介者对象封装一系列对象之间的交互，使对象之间不再相互引用，降低耦合
 
-# 同步模块模式
+相比于观察者模式（发布订阅）是单向通信的，中介者模式中消息发送方只有一个，中介对象不能订阅消息，只有活跃对象（订阅者）才可以订阅中介者的消息
 
-# 异步模块模式
+``` JS
+function mediator() {
+  let _msg = {}
+  return {
+    register: function(type, action) {
+      if (_msg[type]) {
+        _msg[type].push(action)
+      } else {
+        _msg[type] = [action]
+      }
+    },
+    send: function(type) {
+      if (_msg[type]) {
+        _msg[type].forEach(fn => {
+          if (typeof fn === 'function') fn()
+        })
+      }
+    }
+  }
+}
+```
 
-# widget模式
+## 备忘录模式
 
-# MVC模式
+> 在不破坏对象的封装性的前提下，在对象之外捕获并保存该对象内部的状态以便日后对象使用或者对象回复到以前的某个状态
 
-# MVP模式
+## 迭代器模式
 
-# MVVM模式
+## 解释器模式
+
+## 链模式
+
+## 委托模式
+
+## 数据访问对象模式
+
+## 节流模式
+
+## 简单模板模式
+
+## 惰性模式
+
+## 参与者模式
+
+## 等待者模式
+
+## 同步模块模式
+
+## 异步模块模式
+
+## widget模式
+
+## MVC模式
+
+## MVP模式
+
+## MVVM模式
 
