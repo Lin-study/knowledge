@@ -868,35 +868,561 @@ function mediator() {
 
 > 在不破坏对象的封装性的前提下，在对象之外捕获并保存该对象内部的状态以便日后对象使用或者对象回复到以前的某个状态
 
+缓存请求过的数据
+
+``` JS
+function page() {
+  // 缓存对象
+  let cache = {}
+  return function(page, fn) {
+    // 如果该页数据在缓存中，则恢复到该页状态，显示该页内容
+    if (cache[page]) {
+      showPage(page, cache[page])
+    } else {
+      // 若无缓存数据则通过请求数据之后将再将数据放入到缓存对象中
+    }
+  }
+}
+```
+
 ## 迭代器模式
+
+> 在不暴露对象内部结构的同时，可以顺序的访问聚合对象内部的元素
+
+顺序的访问一个聚合对象内部的元素，可以简化我们的遍历操作
+
+``` JS
+function iterator(items, container) {
+  items = container.getElementsByTagName(items)
+  let index = 0
+  let length = items.length
+  return {
+    // 获取第一个元素
+    first: function() {
+      index = 0
+      return items[index]
+    },
+    // 获取最后一个元素
+    second: function() {
+      index = length - 1
+      return items[index]
+    },
+    // 获取前一个元素（如果当前元素为第一个元素，那么获取第一个时，返回空元素，并置为0）
+    pre: function() {
+      if (--index > 0) {
+        return items[index]
+      } else {
+        index = 0
+        return null
+      }
+    },
+    // 获取最后一个元素
+    next: function() {
+      if (++index < length) {
+        return items[index]
+      } else {
+        index = length - 1
+        return null
+      }
+    },
+    // 获取num
+    get: function(num) {
+      index = num >= 0 ? num % length : num % length + length
+      return items[index]
+    },
+    // 使所有元素执行该方法
+    dealEach: function(fn) {
+      let args = Array.prototype.splice.call(arguments, 1)
+      for (let i = 0; i < length; i++) {
+        fn.apply(items[i], args)
+      }
+    },
+    // 使某一元素执行该方法
+    dealItem: function(num, fn) {
+      fn.apply(this.get(num), Array.prototype.splice.call(arguments, 2))
+    }
+  }
+}
+```
 
 ## 解释器模式
 
+> 通过一种解释器可以来解释语言中定义的句子
+
 ## 链模式
+
+> 在对象中将当前对象返回，实现链式调用
+
+``` JS
+function A(selector) {
+  return new A.fn.init(selector)
+}
+A.fn = A.prototype = {
+  init: function(selector) {
+    this[0] = document.getElementById(selector)
+    this.length = 1
+    return this
+  }
+}
+```
 
 ## 委托模式
 
+> 多个对象接受并处理同一请求，将请求委托给另一个对象同一处理请求
+
+dom节点的事件委托是将事件放入到父节点中，点击的时候通过事件冒泡传递到父组件上，通过e.target.nodeName去判断节点
+
+``` JS
+ul.onclick = function(e) {
+  let e = e || window.event
+  let tar = e.target || e.srcElement
+  if (tar.nodeName.toLowerCase() === 'li') {
+    // 事件处理
+  }
+}
+```
+
 ## 数据访问对象模式
+
+> 抽象和封装对数据源的访问与存储，该模式通过对数据源链接的管理方便对数据的访问和存储
+
+``` JS
+/**
+ * 本地存储类
+ * preId 本地存储数据库前缀
+ * timeSign 定义事件戳与存储数据之间的拼接符
+ */
+function baseLocalStorage(preId, timeSign) {
+  this.preId = preId
+  this.timeSign = timeSign || '|-|'
+}
+baseLocalStorage.prototype = {
+  // 操作状态
+  status: {
+    SUCCESS: 0, // 成功
+    FAILURE: 1, // 失败
+    OVERFLOW: 2, // 溢出
+    TIMEOUT: 3 // 过期
+  },
+  // 保存本地存储链接
+  storage: localStorage || window.localStorage,
+  // 获取本地存储数据库数据真实字段
+  getKey: function(key) {
+    return this.preId + key
+  },
+  /**
+   * 修改添加数据
+   * key 数据的key值
+   * value 数据
+   * callback 回调
+   * time 过期时间
+   */
+  set: function(key, value, callback, time) {
+    // 默认为操作成功
+    let status = this.status.SUCCESS
+    // 获取真实的key值
+    key = this.getKey(key)
+    try {
+      // 获取时间戳
+      time = new Date(time).getTime() || time.getTime()
+    } catch (error) {
+      // 当时间戳获取错误，使用当前时间
+      time = new Date().getTime() + 1000 * 60 * 60 * 24 * 31
+    }
+    try {
+      //  添加数据
+      this.storage.setItem(key, time + this.timeSign + value)
+    } catch (error) {
+      // 溢出
+      status = this.status.OVERFLOW
+    }
+    // 执行回调，并传入操作的状态
+    callback && callback.call(this, status, key, value)
+  },
+  /**
+   * 获取数据
+   * key 数据字段标识
+   * callback 回调
+   */
+  get: function(key, callback) {
+    let status = this.status.SUCCESS // 默认为成功
+    key = this.getKey(key) // 获取真实key值
+    let value = null // 获取的值
+    let timeSignLen = this.timeSign.length // 时间戳与存储数据之间的拼接符长度
+    let that = this
+    let index // 时间戳与存储数据之间的拼接符起始位置
+    let time // 事件戳
+    let result // 最终获取的数据
+    try {
+      value = that.storage.getItem(key) // 获取字段对应的数据
+    } catch (error) { // 出错后返回失败状态
+      result = {
+        status: that.status.FAILURE,
+        value: null
+      }
+      callback && callback.call(this, resule.status, result.value)
+      return result
+    }
+    // 获取成功
+    if (value) {
+      index = value.indexof(that.timeSign) // 获取时间戳与存储数据之间的拼接符起始位置
+      time = +value.slice(0, index) // 获取存入数据时的过期时间戳
+      if (new Date(time).getTime() > new Date().getTime() || time == 0) {
+        value = value.slice(index + timeSignLen) // 获取数据
+      } else {
+        value = null
+        status = that.status.TIMEOUT // 设置为过期
+        that.remove(key)
+      }
+    } else {
+      status = that.status.FAILURE
+    }
+    result = {
+      status,
+      value
+    }
+    callback && callback.call(this, resule.status, result.value)
+    return result
+  },
+  remove: function(key, callback) {
+    let status = this.status.SUCCESS // 默认为成功
+    key = this.getKey(key) // 获取真实key值
+    let value = null
+    try {
+      value = this.storage.getItem(key)
+    } catch (error) {}
+    if (value) {
+      try {
+        this.storage.removeItem(key)
+        status = this.status.SUCCESS
+      } catch (error) {}
+    }
+    callback && callback.call(this, status, status > 0 ? null : value.slice(value.indexof(this.timeSign) + this.timeSign.length))
+  }
+}
+```
 
 ## 节流模式
 
+> 对重复的业务逻辑进行节流控制，执行最后一次操作并取消其他操作以提高性能
+
+请参照防抖和节流
+
+``` JavaScript
+  let debounce = (fn, delay) => {
+    let timer = null;
+    // 标志是否可以执行函数
+    let flag = true
+    return function(...args) {
+      if (time) clearTimeout(timer)
+      if (!flag) return
+      flag = false
+      timer = setTimeout(() => {
+        fn(...args)
+        flag = true
+      }, delay)
+    }
+  }
+```
+
 ## 简单模板模式
+
+> 通过格式化字符串拼凑出视图避免创建视图时大量节点操作。优化内存开销
+
+``` JS
+function formateString(str, data) {
+  return str.replace(/\{#(\w+)#\}/g, function(m, k) {
+    return typeof data[key] === undefined ? '' : data[key]
+  })
+}
+// 模板库
+function view(name) {
+  let v = {
+    code: '<pre><code>{#code#}</code></pre>'
+  }
+  if (Array.isArray(name)) {
+    let tpl = ''
+    for (let i = 0, len = name.length; i < len; i++) {
+      tpl += arguments.callee(name[i]) // tpl += view(name[i])
+    }
+    return tpl
+  } else {
+    return v[name] ? v[name] : ( `<${name}>{#${name}#}</${name}>` )
+  }
+}
+liTpl = formateString(view('li'), {
+  li: view(['storage', 'span'])
+})
+```
 
 ## 惰性模式
 
+> 减少每次代码执行时重复性的分支判断，通过对对象重定义来屏蔽源对象中的分支判断
+
+* 在文件加载进来的时候通过闭包的形式执行该方法的重新定义（会在页面加载的时候占用资源）
+* 在第一次的基础上延迟执行（第一次执行时有一定的资源消耗，但是减少了文件加载时资源消耗）
+
+``` JS
+A.on = function() {
+  if (dom.addEventListener) {
+    return function(dom, type, fn) {
+      dom.addEventListener(type, fn, false)
+    }
+  } else if (dom.attachEvent) {
+    return function(dom, type, fn) {
+      dom.attachEvent('on' + type, fn)
+    }
+  } else {
+    return function(dom, type, fn) {
+      dom['on' + type] = fn
+    }
+  }
+}
+
+A.on = function(dom, type, fn) {
+  if (dom.addEventListener) {
+    A.on = function(dom, type, fn) {
+      dom.addEventListener(type, fn, false)
+    }
+  } else if (dom.attachEvent) {
+    A.on = function(dom, type, fn) {
+      dom.attachEvent('on' + type, fn)
+    }
+  } else {
+    A.on = function(dom, type, fn) {
+      dom['on' + type] = fn
+    }
+  }
+  A.on(dom, type, fn)
+}
+```
+
 ## 参与者模式
+
+> 在特定的作用域中执行给定的函数，并将参数原封不动的传递
+
+类似于在定时器中执行函数，但是该函数不能使用参数，所以我们使用一个匿名函数，将该函数放入执行
+
+``` JS
+function bind(fn, context) {
+  let slice = Array.prototype.slice
+  // 获取从第三个开始的参数
+  let args = slice.call(arguments, 2)
+  return function() {
+    // 参数拼接
+    let allArgs = slice.call(arguments).concat(args)
+    return fn.apply(content, allArgs)
+  }
+}
+```
 
 ## 等待者模式
 
+> 通过多个异步进程监听，来触发未来发生的动作
+
+用来解决那些不确定先后完成的异步逻辑的
+
+``` JS
+function waiter() {
+  let dfd = [] // 注册的等待对象
+  let doneArr = [] // 成功回调的方法池
+  let failArr = [] // 失败回调的方法池
+  let slice = Array.prototype.slice
+  let that = this
+  let Primise = function() { // 监控对象类
+    this.resolved = false // 监控对象是否解决成功状态
+    this.rejected = false // 监控对象是否解决失败状态
+  }
+  Primise.prototype = {
+    // 解决成功
+    resolve: function() {
+      this.resolved = true // 设置当前监控对象解决成功
+      if (!dfd.length) return // 没有监控对象则取消执行
+      for (let i = dfd.length - 1; i >= 0; i--) {
+        // 如果有任意一个监控对象没有没解决或者解决失败
+        if (dfd[i] && !dfd[i].resolved || dfd[i].rejected) return
+        dfd.splice(i, 1) // 清除监控对象
+      }
+      _exec(doneArr) // 执行成功回调
+    },
+    // 解决失败
+    reject: function() {
+      this.rejected = true
+      if (!dfd.length) return
+      dfd.splice(0) // 清除所有监控对象
+      _exec(failArr) // 执行失败回调
+    }
+  }
+  that.Deferred = function() { // 创建监控对象
+    return new Primise()
+  }
+
+  function _exec(arr) { // 回调执行方法
+    arr.forEach(f => {
+      try {
+        f && f()
+      } catch (error) {}
+    })
+  }
+  that.when = function() { // 监控异步方法
+    dfd = slice.call(arguments)
+    for (let i = dfd - 1; i >= 0; i--) {
+      let d = dfd[i]
+      if (!d || !d.resolved || d.rejected || !d instanceof Primise) {
+        dfd.splice(i, 1)
+      }
+    }
+    return that
+  }
+  that.done = function() { // 成功回调函数
+    doneArr = doneArr.concat(slice.call(arguments))
+    return that
+  }
+  that.fail = function() { // 失败回调函数
+    failArr = failArr.concat(slice.call(arguments))
+    return that
+  }
+}
+
+/**************执行**********************/
+function first() {
+  let dtd = waiter.Deferred()
+  setTimeout(() => {
+    console.log(111)
+    dtd.resolve()
+  }, 5000);
+  return dtd
+}
+
+function second() {
+  let dtd = waiter.Deferred()
+  setTimeout(() => {
+    console.log(222)
+    dtd.resolve()
+  }, 10000);
+  return dtd
+}
+waiter.when(first, second).done(function() {
+  console.log('success')
+}, function() {
+  console.log('again')
+})
+// 输出 111 222 success again
+```
+
 ## 同步模块模式
+
+**<font color=red>模块化： 将复杂的系统分解成高内聚、低耦合的模块，使系统开发变得可控、可维护、可拓展，提高模块的复用率</font>**
+
+> 请求发出后，无论模块是否存在，立即执行后续逻辑，实现模块开发中对模块的立即引用
+
+首先需要有一个模块管理器，用来管理模块的创建与调度
+
+模块的调用
+
+* 同步模块调度
+* 异步模块调度
+
+``` JS
+// 同步
+F.define = function(str, fn) {
+  let parts = str.split('.') // 解析名称模块
+  // old为当前模块的祖父模块，parent为当前父模块
+  // 如果在闭包中，为了屏蔽对模块的直接访问，建议将模块添加给闭包内部私有变量
+  let old = parent = this
+  // 如果第一个模式使模块管理器单体对象，则移除
+  if (parts[0] === 'F') {
+    parts = parts.slice(1)
+  }
+  // 屏蔽对define和module模块方法的重写
+  if (parts[0] === 'define' || parts[0] === 'module') return
+  let len = parts.length
+  let i = 0
+  for (; i < len; i++) { // 便利路由模块并定义每层模块
+    let part = parts[i]
+    if (typeof parent[part] === 'undefined') { // 如果父模块中不存在当前模块
+      parent[part] = {}
+    }
+    old = parent // 缓存下一层的祖父模块
+    parent = parent[part] // 缓存下一层的父模块
+  }
+  if (fn) old[parts[--i]] = fn() // 如果给定模块方法则定义该模块方法
+  return this
+}
+F.define('string', function() {
+  return {
+    trim: function() {}
+  }
+})
+```
 
 ## 异步模块模式
 
+> 请求发出后，继续其他业务逻辑，直到模块加载完成执行后续逻辑，实现模块开发中对模块加载完成后的引用
+
+会涉及到模块依赖，根据依赖模块加载文件，加载文件成功后执行引用模块时声明的回调函数等一些技术实现
+
 ## widget模式
+
+> 借用 Web Widget 思想（一块可以在任意页面中执行的代码块）将页面分解成部件，针对部件开发，最终组合成完整页面
 
 ## MVC模式
 
+``` JS
+F.model = (function() { // 管理数据和配置
+  let M = {}
+  M.data = {}
+  M.conf = {}
+  return {
+    getData: function() {},
+    getConf: function() {},
+    setData: function() {},
+    setConf: function() {}
+  }
+})()
+F.view = (function() { // 生成页面
+  let M = F.model
+  let V = {}
+  return function(v) {
+    V[v]()
+  }
+})()
+F.ctrl = (function() { // 添加事件
+  let M = F.model
+  let V = F.view
+  let C = {}
+})()
+```
+
 ## MVP模式
 
+> 是在 MVC 模式上演变出来的，将视图层和数据层解耦，同一交由控制器管理层管理，即所有层次的交互都放到presenter层中
+
+``` JS
+F.model = (function() { // 管理数据和配置
+  let M = {}
+  M.data = {}
+  M.conf = {}
+  return {
+    getData: function() {},
+    getConf: function() {},
+    setData: function() {},
+    setConf: function() {}
+  }
+})()
+F.view = (function() { // 生成页面
+  return function(str) {
+    return html //将字符串转换成期望模板
+  }
+})()
+F.ctrl = (function() { // 添加事件
+  let M = F.model
+  let V = F.view
+  let C = {}
+})()
+```
+
 ## MVVM模式
+
+> 模型（Model）-视图（View）-视图模型（ViewModel）
 
