@@ -24,6 +24,28 @@ function bubbleSort(src) {
   return arr;
 }
 
+const array = [1, 3, 2, 6, 4, 5, 9, 8, 7];
+
+const sort = (arr) => {
+  let result = [...arr];
+  let temp;
+  for(let i = 0; i < result.length; i++){
+    for(let j = i + 1; j < result.length; j++){
+      if(result[i] > result[j]){
+        temp = result[i];
+        result[i] = result[j];
+        result[j] = temp;
+      }
+    }
+  }
+
+  return result;
+}
+
+const newArr = sort(array);
+console.log(newArr); // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+
 /**
  * 插入排序
  *
@@ -53,6 +75,66 @@ function insertionSort(src) {
   }
   return arr;
 }
+
+
+const array = [1, 3, 2, 6, 4, 5, 9, 8, 7];
+
+const sort = (arr) => {
+  let result = [...arr];
+  let temp;
+  for(let i = 0; i < result.length; i++){
+    let j = i;
+    while(result[j - 1] > result[j] && j>=0){
+      temp = result[j - 1];
+      result[j - 1] = result[j];
+      result[j] = temp;
+      j--;
+    }
+  }
+
+  return result;
+}
+
+const newArr = sort(array);
+console.log(newArr); // [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+
+// 二分查找版
+const array = [1, 3, 2, 6, 4, 5, 9, 8, 7];
+
+const sort = (arr) => {
+  let result = [...arr];
+  let i = 0;
+  let length = result.length;
+  for(i; i < length; i++) {
+    let left = 0;
+    let right = i - 1;
+    let current = result[i];
+
+    // 找目标位置, 最终的left就是目标位置
+    while(left <= right) {
+      let middle = parseInt((left + right) / 2);
+      if(current < result[middle]){
+        right = middle - 1
+      } else {
+        left = middle + 1;
+      }
+    }
+
+    // 将目标位置后面的元素全部后移一个，位置让出来
+    for(let j = i - 1; j >= left; j--){
+      result[j+1] = result[j];
+    }
+
+    // 最后将当前值插入到正确位置
+    result[left] = current;
+  }
+
+  return result;
+}
+
+const newArr = sort(array);
+console.log(newArr); // [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 const samples = [{
     src: [1, 3, 2, 6, 4, 5, 9, 8, 7],

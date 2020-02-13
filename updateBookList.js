@@ -4,7 +4,7 @@ const rm = require('rimraf')
 
 let list = []
 // 过滤的文件夹内容
-const filterName = ['img', 'node_modules', '.git', '.gitignore', 'README.md', 'updateBookList.js']
+const filterName = ['img', 'node_modules', '.git', '.gitignore', 'README.md', 'updateBookList.js', 'code']
 // 那些路径下的不再显示（模糊匹配）
 const filterPath = ['公开课', 'vue-webpack分析']
 
