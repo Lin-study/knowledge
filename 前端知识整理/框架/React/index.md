@@ -5,7 +5,7 @@
 通过this.state存储数据，可以在render函数中通过{this.state.xxx}的形式调用值
 
 事件的调用：通过在class中写函数的形式在render函数中{this.xxx.bind(this)}的方式进行调用
-必须添加.bind(this)，因为在函数执行的时候this被指向为null
+必须添加.bind(this)，因为在函数执行的时候this的指向为函数本身
 
 数据的更改，数据不可以通过this.state.xxx=xxx进行修改，需要通过this.setState({})进行更改
 
@@ -93,6 +93,8 @@ state在constructor中声明
 
 当state或props 发生变化的时候，render函数会被重新执行
 
+state 为单向的数据流。任何的 state 总是所属于特定的组件
+
 # React中的虚拟dom
 
 JSX -> React.createElement -> 虚拟DOM（JS对象） -> 真实DOM
@@ -113,45 +115,6 @@ JSX -> React.createElement -> 虚拟DOM（JS对象） -> 真实DOM
 1. 性能提升
 2. 使跨端应用的实现
 
-# React的生命周期
-
-> 生命周期函数是指某一个时刻组件会自动调用执行的函数
-
-* constructor： 组件被创建的时候被调用
-* render函数：组件初始化或者数据更新时被调用
-
-1. Initialization（初始化）
-
-   1. 数据初始化（初始化state和props）
-
-2. Mounting（组件挂载）
-
-   1.componentWillMount（在组件即将被挂载到页面上执行）
-   2.render函数
-   3.componentDidMount（组件被挂载到页面上后被执行）
-
-3. Updation（组件更新）
-
-   1. Props
-
-      1. ComponentWillReceiveProps
-
-         1. 子组件从父组件接受函数
-         2. 父组件的render函数被执行，子组件的该函数被执行
-         3. 组件第一次放入父组件时不会执行
-         4. 如果组件之前已经存在于父组件中，才会执行
-
-      2. 执行states的变化
-
-   2.states
-
-      1. shouldComponentUpdate（组件被更新之前执行, 判断是否需要更新，默认返回true）
-      2. componentWillUpdate（组件确认被更新后，组件更新执行）
-      3. 执行render函数
-      4. componentDidUpdate（组件更新后被执行）
-4. Unmounting（卸载）
-
-   1. ComponentWillUnmount（在卸载之前被执行）
 
 # Redux（数据层框架）
 
