@@ -15,7 +15,7 @@ const timeTaken = callback => {
 };
 // 创建一个发布/订阅（发布-订阅）事件集线
 const createEventHub = () => ({
-  hub: {},
+  hub: Object.create(null),// 创建没有prototype的对象
   emit(event, data) {
     (this.hub[event] || []).forEach(handler => handler(data));
   },
