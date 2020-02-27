@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+  }
+  
+  p {
+    margin: 0em 5em 4em 5em;
+  }
+  
+  h1,
+  p {
+    text-align: left;
+    line-height: 1.8;
+    font-family: Lora, serif;
+  }
+  
+  .glowIn span {
+    animation: glow-in 0.8s both;
+  }
+  
+  @keyframes glow-in {
+    from {
+      opacity: 0;
+    }
+    65% {
+      opacity: 1;
+      text-shadow: 0 0 25px black;
+    }
+    75% {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.7;
+    }
+  }
+</style>
+
+<body>
+  <h1 class="glowIn">Hello World</h1>
+  <p class="glowIn">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor  </p>
+</body>
+<script>
+  let glowInTexts = document.querySelectorAll(".glowIn");
+  glowInTexts.forEach(glowInText => {
+    let letters = glowInText.textContent.split("");
+    glowInText.textContent = "";
+    letters.forEach((letter, i) => {
+      let span = document.createElement("span");
+      span.textContent = letter;
+      span.style.animationDelay = `${i * 0.05}s`;
+      glowInText.append(span);
+    });
+  });
+</script>
+
+</html>

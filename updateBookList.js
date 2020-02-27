@@ -4,9 +4,9 @@ const rm = require('rimraf')
 
 let list = []
 // 过滤的文件夹内容
-const filterName = ['img', 'node_modules', '.git', '.gitignore', 'README.md', 'updateBookList.js', 'code']
+const filterName = ['img', 'node_modules', '.git', '.gitignore', 'README.md', 'updateBookList.js', 'code', '.vscode','package.json']
 // 那些路径下的不再显示（模糊匹配）
-const filterPath = ['公开课', 'vue-webpack分析']
+const filterPath = ['\\公开课\\', '\\框架\\', 'vue-webpack分析', '小工具\\页面\\', '常用代码片段']
 
 const getdir = function (dir, list) {
   var files = fs.readdirSync(dir);
@@ -19,9 +19,8 @@ const getdir = function (dir, list) {
       path: filePath,
       size: stats.size
     }
-    if (stats.isDirectory() && !filterPath.find(p => filePath.includes(p) && !filePath.endsWith(p))) {
-      item.child = []
-      getdir(filePath, item.child)
+    if (stats.isDirectory() && !filterPath.find(p => filePath.includes(p))) {
+      getdir(filePath, item.child = [])
     }
     list.push(item)
   });

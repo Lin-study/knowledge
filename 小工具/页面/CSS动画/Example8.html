@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<style>
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    width: 300px;
+  }
+  
+  .loading {
+    position: relative;
+    width: 8em;
+    height: 8em;
+    /* background: black; */
+    border-radius: 50%;
+    box-shadow: inset 0.5em -0.5em crimson;
+    animation: spin 2s linear infinite;
+  }
+  .loading::before,
+  .loading::after {
+      position: absolute;
+      content: "";
+      width: 100%;
+      height: 100%;
+      background: inherit;
+      border-radius: inherit;
+      box-shadow: inherit;
+    }
+  .loading::before {
+      filter: blur(5px);
+    }
+  .loading::after {
+      filter: blur(10px);
+    }
+  
+  @keyframes spin {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+</style>
+
+<body>
+  <div class="loading"></div>
+</body>
+<script></script>
+
+</html>
