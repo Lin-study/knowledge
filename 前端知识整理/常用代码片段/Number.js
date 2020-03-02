@@ -8,3 +8,8 @@ const sum = (...arr) => [...arr].reduce((acc, val) => acc + val, 0);
 const floor = (num) => num | 0
 // 四舍五入
 const round = (num) => (num + 0.5) | 0
+// 计算两点之间的距离
+const distance = (x0, y0, x1, y1) => Math.hypot(x1 - x0, y1 - y0);
+
+// 将标准的度数，转换成弧度。
+const degreesToRads = deg => (deg * Math.PI) / 180.0;
