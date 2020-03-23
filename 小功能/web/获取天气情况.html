@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Yahoo Weather API</title>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <style type="text/css">
+        /*下拉菜单部分*/
+        #citySelect {
+            width: 160px;
+            height: 30px;
+            border-radius: 5px;
+        }
+
+        /*天气展示部分*/
+        #weatherInfo {
+            width: 280px;
+            height: 145px;
+        }
+
+        .weather {
+            width: 270px;
+            background: -moz-linear-gradient(top, white, #b9c9ff);
+            background: -webkit-linear-gradient(top, white, #b9c9ff);
+            background: -o-linear-gradient(top, white, #b9c9ff);
+            background: -ms-linear-gradient(top, white, #b9c9ff);
+            background: linear-gradient(to bottom, white, #b9c9ff);
+            border-radius: 10px;
+            padding: 3px;
+            display: none;
+        }
+
+        .astronomy,
+        .futureWeather {
+            font-size: small;
+            text-align: center;
+        }
+
+        .nowWeatherTable {
+            width: 75%;
+            margin: 0 auto;
+            font-weight: bold;
+        }
+
+        #weatherInfo h4 {
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        .nowWeather {
+            position: relative;
+            bottom: 15px;
+        }
+
+        .futureWeather {
+            margin-top: 5px;
+        }
+
+        .futureWeather table {
+            width: 100%;
+            margin: 0px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div style="width: 600px;height: 200px;">
+        <table cellspacing="0" cellpadding="0" border="0">
+            <tr>
+                <td>
+                    <div id="weatherInfo"></div>
+                </td>
+                <td>
+                    <select id="citySelect"></select>
+                </td>
+            </tr>
+        </table>
+        <br>
+        <img src="http://l.yimg.com/a/i/brand/purplelogo//uh/us/news-wea.gif" style="width: 142px;float: right;">
+        <small style="float: right;margin-right: 20px;">Powered By</small>
+    </div>
+
+    <!-- 基本数据 -->
+    <script type="text/javascript">
+        var apiServer = 'https://query.yahooapis.com/v1/public/yql';//使用公共的天气接口
+        var citiesId = [
+            //WOEID 数据，来自于http://woeid.rosselliot.co.nz/lookup
+            '2151330',//北京
+            '2151849',//上海
+            '2161853',//深圳
+            '2161838',//广州
+            '2163866',//武汉
+            '2137081',//南京
+            '2157249',//西安
+            '2158434',//重庆
+            '2165352',//香港
+            '565346',//赫尔辛基
+            '906057',//斯德哥尔摩
+            '554890',//哥本哈根
+            '862592',//奥斯陆
+            '980389',//雷克雅未克
+        ];
+        var citiesName = [
+            '北京',
+            '上海',
+            '深圳',
+            '广州',
+            '武汉',
+            '南京',
+            '西安',
+            '重庆',
+            '香港',
+            '赫尔辛基',
+            '斯德哥尔摩',
+            '哥本哈根',
+            '奥斯陆',
+            '雷克雅未克',
+        ];
+
+        var weatherCode = [
+            '龙卷风',//0 tornado
+            '热带风暴',//1 tropical storm
+            '飓风',//2 hurricane
+            '次剧烈雷雨',//3 severe thunderstorms
+            '雷雨',//4 thunderstorms
+            '雨夹雪',//5 mixed rain and snow
+            '雨夹雪',//6 mixed rain and sleet
+            '雨夹雪',//7 mixed snow and sleet
+            '毛毛雨',//8 freezing drizzle
+            '小雨',//9 drizzle
+            '冻雨',//10 freezing rain
+            '小阵雨',//11 showers
+            '大阵雨',//12 showers
+            '小雪花',//13 snow flurries
+            '小雪阵雨',//14 light snow showers
+            '风雪天',//15 blowing snow
+            '雪',//16 snow
+            '冰雹',//17 hail
+            '雨夹雪',//18 sleet
+            '灰尘',//19 dust
+            '雾',//20 foggy
+            '霾',//21 haze
+            '烟',//22 smoky
+            '风暴',//23 blustery
+            '多风',//24 windy
+            '冷',//25 cold
+            '多云',//26 cloudy
+            '多云',//27 mostly cloudy (night)
+            '多云',//28 mostly cloudy (day)
+            '多云转晴',//29 partly cloudy (night)
+            '多云转晴',//30 partly cloudy (day)
+            '晴',//31 clear (night)
+            '晴',//32 sunny
+            '少云',//33 fair (night)
+            '少云',//34 fair (day)
+            '混合雨和冰雹',//35 mixed rain and hail
+            '炎热',//36 hot
+            '零星雷暴',//37 isolated thunderstorms
+            '零星雷阵雨',//38 scattered thunderstorms
+            '零星雷阵雨',//39 scattered thunderstorms
+            '零星阵雨',//40 scattered showers
+            '大雪',//41 heavy snow
+            '分散的阵雪',//42 scattered snow showers
+            '大雪',//43 heavy snow
+            '部分多云',//44 partly cloudy
+            '雷阵雨',//45 thundershowers
+            '阵雪',//46 snow showers
+            '零星雷阵雨',//47 isolated thundershowers
+            '无法获取',//48 3200 not available
+        ];
+    </script>
+
+    <script type="text/javascript">
+
+        //生成下拉菜单
+        var optionHTML = "";
+        for (var i = 0; i < citiesId.length; i++) {
+            optionHTML = optionHTML + '<option value="' + i + '">' + citiesName[i] + '</option>';
+        }
+        $('#citySelect').append(optionHTML);
+
+        var cityContainer = $("#citySelect");
+        cityContainer.change(function () {
+            var index = $(this).val();
+            showWeatherInfo(index);
+        })
+
+        //默认生成北京天气窗口	
+        showWeatherInfo(0);
+        // 生成天气窗口
+        function showWeatherInfo(sequence) {
+            var queryString = 'select * from weather.forecast where woeid=' + citiesId[sequence] + ' and u="c"';
+            $.ajax({
+                url: apiServer,
+                data: {
+                    format: 'json',
+                    q: queryString,
+                },
+                success: function (data) {
+                    console.log(data.query.results);
+                    if (data.query.results.channel.item.condition.code === 3200) {
+                        data.query.results.channel.item.condition.code = 48;
+                    }
+                    if (data.query.results.channel.astronomy.sunrise == "0:0 am" || data.query.results.channel.astronomy.sunset == "0:0 am") {
+                        data.query.results.channel.astronomy.sunrise = "暂无数据";
+                        data.query.results.channel.astronomy.sunset = "暂无数据";
+                    }
+                    // 获取天气图片
+                    var weatherImgURL = '你的天气图包的地址';
+                    switch (data.query.results.channel.item.condition.code) {
+                        case '0':
+                            weatherImgURL = weatherImgURL + 'Weather NA.png'; break;
+                        case '1':
+                            weatherImgURL = weatherImgURL + 'Thunderstorms.png'; break;
+                        case '2':
+                            weatherImgURL = weatherImgURL + 'Windy.png'; break;
+                        case '3':
+                            weatherImgURL = weatherImgURL + 'Thunders.png'; break;
+                        case '4':
+                            weatherImgURL = weatherImgURL + 'Thunderstorms.png'; break;
+                        case '5':
+                            weatherImgURL = weatherImgURL + 'Icy Snow.png'; break;
+                        case '6':
+                            weatherImgURL = weatherImgURL + 'Icy Snow.png'; break;
+                        case '7':
+                            weatherImgURL = weatherImgURL + 'Icy Snow.png'; break;
+                        case '8':
+                            weatherImgURL = weatherImgURL + 'Light Rain.png'; break;
+                        case '9':
+                            weatherImgURL = weatherImgURL + 'Light Rain.png'; break;
+                        case '10':
+                            weatherImgURL = weatherImgURL + 'Icy.png'; break;
+                        case '11':
+                            weatherImgURL = weatherImgURL + 'Rain.png'; break;
+                        case '12':
+                            weatherImgURL = weatherImgURL + 'Heavy Rain.png'; break;
+                        case '13':
+                            weatherImgURL = weatherImgURL + 'Few Flurries.png'; break;
+                        case '14':
+                            weatherImgURL = weatherImgURL + 'Wet Flurries.png'; break;
+                        case '15':
+                            weatherImgURL = weatherImgURL + 'Windy Snow.png'; break;
+                        case '16':
+                            weatherImgURL = weatherImgURL + 'Snow.png'; break;
+                        case '17':
+                            weatherImgURL = weatherImgURL + 'Weather NA.png'; break;
+                        case '18':
+                            weatherImgURL = weatherImgURL + 'Icy Snow.png'; break;
+                        case '19':
+                            weatherImgURL = weatherImgURL + 'Dust.png'; break;
+                        case '20':
+                            weatherImgURL = weatherImgURL + 'Fog.png'; break;
+                        case '21':
+                            weatherImgURL = weatherImgURL + 'Haze.png'; break;
+                        case '22':
+                            weatherImgURL = weatherImgURL + 'Smoke.png'; break;
+                        case '23':
+                            weatherImgURL = weatherImgURL + 'Thunderstorms.png'; break;
+                        case '24':
+                            weatherImgURL = weatherImgURL + 'Windy.png'; break;
+                        case '25':
+                            weatherImgURL = weatherImgURL + 'Frigid.png'; break;
+                        case '26':
+                            weatherImgURL = weatherImgURL + 'Cloudy.png'; break;
+                        case '27':
+                            weatherImgURL = weatherImgURL + 'Cloudy Night.png'; break;
+                        case '28':
+                            weatherImgURL = weatherImgURL + 'Cloudy.png'; break;
+                        case '29':
+                            weatherImgURL = weatherImgURL + 'Night Few Clouds.png'; break;
+                        case '30':
+                            weatherImgURL = weatherImgURL + 'Mostly Sunny.png'; break;
+                        case '31':
+                            weatherImgURL = weatherImgURL + 'Moon.png'; break;
+                        case '32':
+                            weatherImgURL = weatherImgURL + 'Sunny.png'; break;
+                        case '33':
+                            weatherImgURL = weatherImgURL + 'Night Few Clouds.png'; break;
+                        case '34':
+                            weatherImgURL = weatherImgURL + 'Sun.png'; break;
+                        case '35':
+                            weatherImgURL = weatherImgURL + 'Icy Snow.png'; break;
+                        case '36':
+                            weatherImgURL = weatherImgURL + 'Hot.png'; break;
+                        case '37':
+                            weatherImgURL = weatherImgURL + 'Thunders.png'; break;
+                        case '38':
+                            weatherImgURL = weatherImgURL + 'Thunderstorms.png'; break;
+                        case '39':
+                            weatherImgURL = weatherImgURL + 'Thunderstorms.png'; break;
+                        case '40':
+                            weatherImgURL = weatherImgURL + 'Rain.png'; break;
+                        case ' 41':
+                            weatherImgURL = weatherImgURL + 'Snow.png'; break;
+                        case '42':
+                            weatherImgURL = weatherImgURL + 'Few Flurries.png'; break;
+                        case '43':
+                            weatherImgURL = weatherImgURL + 'Snow.png'; break;
+                        case '44':
+                            weatherImgURL = weatherImgURL + 'Cloudy.png'; break;
+                        case '45':
+                            weatherImgURL = weatherImgURL + 'Thunderstorms.png'; break;
+                        case '46':
+                            weatherImgURL = weatherImgURL + 'Rain.png'; break;
+                        case '47':
+                            weatherImgURL = weatherImgURL + 'Thunderstorms.png'; break;
+                        case '48':
+                            weatherImgURL = weatherImgURL + 'Weather NA.png'; break;
+                    }
+                    var weatherDiv =
+                        '<div class="weather" id="' + citiesId[sequence] + '">' +
+                        '<table cellspacing="0" cellpadding="0" border="0" class="nowWeatherTable">' +
+                        '<tr>' +
+                        '<td width="75px">' +
+                        '<div class="weatherImg">' + '<img src="' + weatherImgURL + '" width="65px" height="65px">' + '</div>' +
+                        '</td>' +
+                        '<td>' +
+                        '<h4>' + citiesName[sequence] + '      ' + data.query.results.channel.item.condition.temp + '℃   ' + '</h4>' +
+                        '<div class="nowWeather">' + weatherCode[data.query.results.channel.item.condition.code] + '</div>'
+                        + '</td>'
+                        + '</tr>'
+                        + '</table>'
+                        + '<div class="astronomy">' + '日出：' + data.query.results.channel.astronomy.sunrise + '      ' + '日落：' + data.query.results.channel.astronomy.sunset + '</div>'
+                        + '<div class="futureWeather">' +
+                        '<table  cellspacing="0" cellpadding="0" border="0">' +
+                        '<tr>' +
+                        '<td>明天</td>' +
+                        '<td>后天</td>' +
+                        '<td>大后天</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td>' + data.query.results.channel.item.forecast[1].high + '℃   ' + '~' + data.query.results.channel.item.forecast[1].low + '℃   ' + '</td>' +
+                        '<td>' + data.query.results.channel.item.forecast[2].high + '℃   ' + '~' + data.query.results.channel.item.forecast[2].low + '℃   ' + '</td>' +
+                        '<td>' + data.query.results.channel.item.forecast[3].high + '℃   ' + '~' + data.query.results.channel.item.forecast[3].low + '℃   ' + '</td>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<td>' + weatherCode[data.query.results.channel.item.forecast[1].code] + '</td>' +
+                        '<td>' + weatherCode[data.query.results.channel.item.forecast[2].code] + '</td>' +
+                        '<td>' + weatherCode[data.query.results.channel.item.forecast[3].code] + '</td>' +
+                        '</tr>'
+                        + '</table>'
+                        + '</div>'
+                        + '</div>';
+
+                    $('#weatherInfo').empty();
+                    $('#weatherInfo').append(weatherDiv);
+                    $('.weather').fadeIn(800);//淡入效果
+                }
+            });
+        }
+    </script>
+</body>
