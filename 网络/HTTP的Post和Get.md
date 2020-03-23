@@ -142,3 +142,6 @@ http协议最常见的两种方法GET和POST，这几点答案其实有几点并
   + 504 Gateway Timeout：网关超时。
   + 505 HTTP Version Not Supported：服务器不支持请求中指明的HTTP协议版本。
 
+# 1.4 Get和Post区别
+
+![](./img/Get和Post区别.png)
