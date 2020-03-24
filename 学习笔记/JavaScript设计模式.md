@@ -720,6 +720,34 @@ let Observer = (function() {
 })()
 ```
 
+## 中介者模式
+
+> 通过中介者对象封装一系列对象之间的交互，使对象之间不再相互引用，降低耦合
+
+相比于观察者模式（发布订阅）是单向通信的，中介者模式中消息发送方只有一个，中介对象不能订阅消息，只有活跃对象（订阅者）才可以订阅中介者的消息
+
+``` JS
+function mediator() {
+  let _msg = {}
+  return {
+    register: function(type, action) {
+      if (_msg[type]) {
+        _msg[type].push(action)
+      } else {
+        _msg[type] = [action]
+      }
+    },
+    send: function(type) {
+      if (_msg[type]) {
+        _msg[type].forEach(fn => {
+          if (typeof fn === 'function') fn()
+        })
+      }
+    }
+  }
+}
+```
+
 ## 状态模式
 
 > 当一个对象内部状态发生改变时，会导致其行文的改变，这看起来像是改变了状态。
@@ -833,34 +861,6 @@ function bindIEEvent(dom, type, fn, data) {
   dom.attachEvent('on' + type, function(e) {
     fn.call(dom, e, data)
   })
-}
-```
-
-## 中介者模式
-
-> 通过中介者对象封装一系列对象之间的交互，使对象之间不再相互引用，降低耦合
-
-相比于观察者模式（发布订阅）是单向通信的，中介者模式中消息发送方只有一个，中介对象不能订阅消息，只有活跃对象（订阅者）才可以订阅中介者的消息
-
-``` JS
-function mediator() {
-  let _msg = {}
-  return {
-    register: function(type, action) {
-      if (_msg[type]) {
-        _msg[type].push(action)
-      } else {
-        _msg[type] = [action]
-      }
-    },
-    send: function(type) {
-      if (_msg[type]) {
-        _msg[type].forEach(fn => {
-          if (typeof fn === 'function') fn()
-        })
-      }
-    }
-  }
 }
 ```
 
