@@ -12,3 +12,56 @@
  *    2. 如果回调函数返回的不是 promise，return 的 promise 就会成功，value 就是返回的值
  *    3. 如果返回的是 promise 新的promise的状态就是返回的 promise 状态
  */
+
+// class版
+(function(window) {
+  const PENDING = 'pending'
+  const RESOLVED = 'resolved'
+  const REJECTED = 'rejected'
+  class myPromise {
+    constructor(task) {
+      // 初始化状态
+      this.status = PENDING
+      this.callbacks = []
+        // 执行成功的回调函数
+      function onResolve(value) {
+        if (this.status !== PENDING) return
+        setTimeout(() => {
+          this.status = RESOLVED
+          this.callbacks.forEach(callback => {
+            const resolve = callback.resolve
+            if (typeof resolve === 'function') resolve(value)
+          })
+        })
+      }
+      // 执行失败的回调函数
+      function onReject(reason) {
+        if (this.status !== PENDING) return
+        setTimeout(() => {
+          this.status = REJECTED
+          this.callbacks.forEach(callback => {
+            const reject = callback.reject
+            if (typeof reject === 'function') reject(reason)
+          })
+        })
+      }
+      onResolve = onResolve.bind(this)
+      onReject = onReject.bind(this)
+      try {
+        task(onResolve, onReject)
+      } catch (error) {
+        onReject(error)
+      }
+    }
+    then(resolve, reject) {
+      this.callbacks.push({resolve, reject})
+    }
+    catch (reject) {
+
+    }
+  }
+  myPromise.all = () => {
+
+  }
+  window.myPromise = myPromise
+})(window)
