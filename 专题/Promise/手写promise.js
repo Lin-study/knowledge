@@ -6,44 +6,6 @@ const STATUS = {
 }
 class Promise {
   constructor(task) {
-    // promise初始状态
-    this.status = STATUS.PENDING;
-    // resolve时返回的数据，正常请求返回的数据
-    this.resolveData = null;
-    // reject时返回的数据，错误的时候返回的拒绝原因
-    this.rejectData = null;
-    // resolve和reject时执行的回调队列
-    // promise的resolve和reject为异步响应时，即调用then时promise为
-    // pending状态，则将传入then的函数加入该队列，等待promise resolve或
-    // reject时执行该队列
-    this.onFulfilledList = [];
-    this.onRejectedList = [];
-    /**
-    * promise成功，执行onFulfilledList回调
-    * @param {*} data 
-    */
-    this.onResolve = (data) => {
-      if (this.status === STATUS.PENDING) {
-        this.status = STATUS.FULFILLED;
-        this.resolveData = data;
-        this.onFulfilledList.forEach(fn => {
-          fn(this.resolveData)
-        })
-      }
-    }
-    /**
-    * promise失败，执行onRejectedList回调
-    * @param {*} err 
-    */
-    this.onReject = (err) => {
-      if (this.status === STATUS.PENDING) {
-        this.status = STATUS.REJECTED;
-        this.rejectData = err;
-        this.onRejectedList.forEach(fn => {
-          fn(this.rejectData)
-        })
-      }
-    }
     /**
     * promise解析, 根据then 返回数据类型不同封装不同的promise
     * 返回，以便实现then的链式调用及Promise的thenable特性 
@@ -84,12 +46,6 @@ class Promise {
       else {
         resolve(data)
       }
-    }
-    // 执行传入的任务task
-    try {
-      task(this.onResolve.bind(this), this.onReject.bind(this))
-    } catch (err) {
-      this.onReject(err)
     }
   }
   /**

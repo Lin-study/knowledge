@@ -22,12 +22,16 @@
     constructor(task) {
       // 初始化状态
       this.status = PENDING
+      // Promise的值
+      this.data = null
+      // 回调函数队列
       this.callbacks = []
         // 执行成功的回调函数
       function onResolve(value) {
-        if (this.status !== PENDING) return
+        if (this.status !== PENDING) return // 状态不为 pending 的时候不再执行
+        this.status = RESOLVED
+        this.data = value
         setTimeout(() => {
-          this.status = RESOLVED
           this.callbacks.forEach(callback => {
             const resolve = callback.resolve
             if (typeof resolve === 'function') resolve(value)
@@ -36,9 +40,10 @@
       }
       // 执行失败的回调函数
       function onReject(reason) {
-        if (this.status !== PENDING) return
+        if (this.status !== PENDING) return // 状态不为 pending 的时候不再执行
+        this.status = REJECTED
+        this.data = reason
         setTimeout(() => {
-          this.status = REJECTED
           this.callbacks.forEach(callback => {
             const reject = callback.reject
             if (typeof reject === 'function') reject(reason)
@@ -54,13 +59,14 @@
       }
     }
     then(resolve, reject) {
+      return 
       this.callbacks.push({resolve, reject})
     }
     catch (reject) {
 
     }
   }
-  myPromise.all = () => {
+  myPromise.all = function() {
 
   }
   window.myPromise = myPromise
