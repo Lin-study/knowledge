@@ -6,8 +6,6 @@
 
   > 减少全局变量的声明，合并相同类型
 
-  
-
 ``` JavaScript
   function checkName() {}
 
@@ -18,8 +16,6 @@
 
   + 对象
 
-  
-
 ``` JS
   let checkoutObj = {
     checkName() {},
@@ -29,8 +25,6 @@
 ```
 
   + 类
-
-  
 
 ``` JS
   // 形式一
@@ -281,7 +275,6 @@ function createPop(type, text) {
   if (type === 'alert') {
     // 差异部分
   } else if (type === 'conf') {
-    ouh
     // 差异部分
   }
 }
